@@ -1,0 +1,12 @@
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+
+# macOS
+.DS_Store
+
+# Build artifacts
+*.zip

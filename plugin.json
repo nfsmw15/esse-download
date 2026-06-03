@@ -1,0 +1,10 @@
+{
+    "name": "esse-download",
+    "version": "0.0.1",
+    "description": "Download-Bereich mit öffentlichen und internen Dateien.",
+    "author": "Andreas P.",
+    "class": "EsseDownload\\Plugin",
+    "requires": {
+        "esse": ">=0.1.0"
+    }
+}
