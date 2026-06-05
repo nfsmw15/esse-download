@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Esse\Auth;
-use Esse\Ui;
 
 $flash = null;
 if (!empty($_SESSION['flash'])) {
@@ -16,6 +15,7 @@ $tab      = in_array($tabParam, ['public', 'private'], true) ? $tabParam : 'publ
 $subdir   = isset($_GET['dir']) ? preg_replace('#[^a-zA-Z0-9_\-]#', '', (string) $_GET['dir']) : '';
 
 $allowedExt = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', 'gz', 'tar', 'txt'];
+$storageDir = ESSE_ROOT . '/storage/downloads/' . $tab . ($subdir !== '' ? '/' . $subdir : '');
 
 function esse_dl_admin_read_dir(string $dir, array $allowedExt): array
 {
@@ -75,55 +75,79 @@ function esse_dl_admin_size(int $bytes): string
     return $bytes . ' B';
 }
 
-function esse_dl_admin_build_tab(
-    string $type,
-    string $subdir,
-    array  $subdirs,
-    array  $files,
-    string $csrf,
-    array  $allowedExt
-): string {
-    $label = $type === 'public' ? 'Öffentlich' : 'Intern';
+[$subdirs, $files] = esse_dl_admin_read_dir($storageDir, $allowedExt);
+$csrf = Auth::csrfToken();
 
-    ob_start();
+$pageTitle   = 'Downloads';
+$activeNav   = 'admin.downloads';
+$topbarRight = '<a href="/downloads" target="_blank" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-box-arrow-up-right me-1"></i> Frontend
+</a>';
 
-    if ($subdir !== '') {
-        echo Ui::breadcrumb([
-            ['label' => $label, 'url' => '/admin/downloads?tab=' . $type],
-            ['label' => $subdir],
-        ]);
-    }
+ob_start();
+?>
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link<?= $tab === 'public' ? ' active' : '' ?>" href="/admin/downloads?tab=public">
+            <i class="bi bi-globe2 me-1"></i>Öffentlich
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link<?= $tab === 'private' ? ' active' : '' ?>" href="/admin/downloads?tab=private">
+            <i class="bi bi-lock me-1"></i>Intern
+        </a>
+    </li>
+</ul>
 
-    // Upload panel
-    ob_start();
-    ?>
-    <form method="post" action="/admin/downloads/upload" enctype="multipart/form-data">
-        <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
-        <input type="hidden" name="type"  value="<?= $type ?>">
-        <?php if ($subdir !== ''): ?>
-        <input type="hidden" name="dir" value="<?= htmlspecialchars($subdir) ?>">
-        <?php endif; ?>
-        <div class="row g-2 align-items-end">
-            <div class="col">
-                <input type="file" name="file" class="form-control"
-                       accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.gz,.tar,.txt" required>
-                <div class="form-text">Erlaubt: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR, GZ, TAR, TXT</div>
+<?php if ($subdir !== ''): ?>
+<nav class="mb-3" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/admin/downloads?tab=<?= $tab ?>">
+                <i class="bi bi-folder2-open me-1"></i><?= $tab === 'public' ? 'Öffentlich' : 'Intern' ?>
+            </a>
+        </li>
+        <li class="breadcrumb-item active"><?= htmlspecialchars($subdir) ?></li>
+    </ol>
+</nav>
+<?php endif; ?>
+
+<div class="card mb-4">
+    <div class="card-header py-2">
+        <i class="bi bi-upload me-1"></i> Datei hochladen
+    </div>
+    <div class="card-body">
+        <form method="post" action="/admin/downloads/upload" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
+            <input type="hidden" name="type"  value="<?= $tab ?>">
+            <?php if ($subdir !== ''): ?>
+            <input type="hidden" name="dir" value="<?= htmlspecialchars($subdir) ?>">
+            <?php endif; ?>
+            <div class="row g-2 align-items-end">
+                <div class="col">
+                    <input type="file" name="file" class="form-control"
+                           accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.gz,.tar,.txt" required>
+                    <div class="form-text">Erlaubt: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR, GZ, TAR, TXT</div>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Hochladen
+                    </button>
+                </div>
             </div>
-            <div class="col-auto">
-                <?= Ui::button('Hochladen', '#', ['type' => 'submit', 'icon' => 'bi bi-upload']) ?>
-            </div>
-        </div>
-    </form>
-    <?php
-    echo Ui::panel('Datei hochladen', ob_get_clean(), ['icon' => 'bi bi-upload']);
+        </form>
+    </div>
+</div>
 
-    // Mkdir panel (only at folder root)
-    if ($subdir === '') {
-        ob_start();
-        ?>
+<?php if ($subdir === ''): ?>
+<div class="card mb-4">
+    <div class="card-header py-2">
+        <i class="bi bi-folder-plus me-1"></i> Ordner erstellen
+    </div>
+    <div class="card-body">
         <form method="post" action="/admin/downloads/mkdir">
             <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
-            <input type="hidden" name="type"  value="<?= $type ?>">
+            <input type="hidden" name="type"  value="<?= $tab ?>">
             <div class="row g-2 align-items-end">
                 <div class="col">
                     <input type="text" name="dirname" class="form-control"
@@ -131,95 +155,69 @@ function esse_dl_admin_build_tab(
                            pattern="[a-zA-Z0-9_\-]+" required>
                 </div>
                 <div class="col-auto">
-                    <?= Ui::button('Ordner erstellen', '#', ['type' => 'submit', 'variant' => 'secondary', 'icon' => 'bi bi-folder-plus']) ?>
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="bi bi-folder-plus"></i> Erstellen
+                    </button>
                 </div>
             </div>
         </form>
-        <?php
-        echo Ui::panel('Ordner erstellen', ob_get_clean(), ['icon' => 'bi bi-folder-plus']);
-    }
+    </div>
+</div>
+<?php endif; ?>
 
-    // File list panel
-    $listTitle = ($type === 'public' ? 'Öffentliche' : 'Interne') . ' Dateien'
-               . ($subdir !== '' ? ' / ' . htmlspecialchars($subdir) : '');
+<div class="card">
+    <div class="card-header py-2">
+        <i class="bi bi-folder2-open me-1"></i>
+        <?= $tab === 'public' ? 'Öffentliche' : 'Interne' ?> Dateien
+        <?php if ($subdir !== ''): ?>
+        &nbsp;/&nbsp;<strong><?= htmlspecialchars($subdir) ?></strong>
+        <?php endif; ?>
+    </div>
+    <?php if (empty($subdirs) && empty($files)): ?>
+    <div class="card-body text-secondary">
+        <i class="bi bi-info-circle me-1"></i>Noch keine Dateien vorhanden.
+    </div>
+    <?php else: ?>
+    <div class="list-group list-group-flush">
 
-    if (empty($subdirs) && empty($files)) {
-        $listContent = Ui::emptyState('Noch keine Dateien vorhanden.', '', ['icon' => 'bi bi-folder2-open']);
-    } else {
-        $rows = [];
-        foreach ($subdirs as $dir) {
-            $nameCell = '<a href="/admin/downloads?tab=' . $type . '&dir=' . rawurlencode($dir) . '"'
-                      . ' class="d-flex align-items-center gap-2 text-decoration-none">'
-                      . '<i class="bi bi-folder text-warning fs-5"></i> '
-                      . htmlspecialchars($dir) . '</a>';
-            $rows[] = [$nameCell, '-', 'Ordner', ''];
-        }
-        foreach ($files as $f) {
+        <?php foreach ($subdirs as $dir): ?>
+        <a href="/admin/downloads?tab=<?= $tab ?>&dir=<?= rawurlencode($dir) ?>"
+           class="list-group-item list-group-item-action d-flex align-items-center gap-2">
+            <i class="bi bi-folder text-warning fs-5"></i>
+            <span class="flex-grow-1"><?= htmlspecialchars($dir) ?></span>
+            <i class="bi bi-chevron-right text-secondary ms-auto"></i>
+        </a>
+        <?php endforeach; ?>
+
+        <?php foreach ($files as $f):
             [$icon, $color] = esse_dl_admin_icon($f['ext']);
-            $nameCell = '<div class="d-flex align-items-center gap-2">'
-                      . '<i class="bi ' . $icon . ' ' . $color . ' fs-5"></i>'
-                      . '<div>' . htmlspecialchars($f['name']) . '</div>'
-                      . '</div>';
-            $hidden = '<input type="hidden" name="type" value="' . htmlspecialchars($type) . '">'
-                    . '<input type="hidden" name="file" value="' . htmlspecialchars($f['name']) . '">'
-                    . ($subdir !== '' ? '<input type="hidden" name="dir" value="' . htmlspecialchars($subdir) . '">' : '');
-            $deleteBtn = Ui::button('', '/admin/downloads/delete', [
-                'variant' => 'danger',
-                'size'    => 'sm',
-                'icon'    => 'bi bi-trash3',
-                'method'  => 'post',
-                'hidden'  => $hidden,
-                'attr'    => ['title' => 'Löschen'],
-            ]);
-            $rows[] = [
-                $nameCell,
-                esse_dl_admin_size($f['size']) . ' &middot; ' . date('d.m.Y', $f['mtime']),
-                strtoupper($f['ext']),
-                $deleteBtn,
-            ];
-        }
-        $listContent = Ui::table(['Name', 'Größe', 'Typ', ''], $rows);
-    }
-    echo Ui::panel($listTitle, $listContent, ['icon' => 'bi bi-folder2-open']);
+        ?>
+        <div class="list-group-item d-flex align-items-center gap-2">
+            <i class="bi <?= $icon ?> <?= $color ?> fs-5"></i>
+            <div class="flex-grow-1">
+                <div><?= htmlspecialchars($f['name']) ?></div>
+                <small class="text-secondary">
+                    <?= esse_dl_admin_size($f['size']) ?> &middot; <?= date('d.m.Y', $f['mtime']) ?>
+                </small>
+            </div>
+            <form method="post" action="/admin/downloads/delete" class="flex-shrink-0"
+                  onsubmit="return confirm('<?= htmlspecialchars(addslashes($f['name']), ENT_QUOTES) ?> wirklich löschen?')">
+                <input type="hidden" name="_csrf" value="<?= htmlspecialchars($csrf) ?>">
+                <input type="hidden" name="type"  value="<?= $tab ?>">
+                <input type="hidden" name="file"  value="<?= htmlspecialchars($f['name']) ?>">
+                <?php if ($subdir !== ''): ?>
+                <input type="hidden" name="dir" value="<?= htmlspecialchars($subdir) ?>">
+                <?php endif; ?>
+                <button type="submit" class="btn btn-outline-danger btn-sm" title="Löschen">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </form>
+        </div>
+        <?php endforeach; ?>
 
-    return ob_get_clean();
-}
-
-// Subdir is tab-specific: only the active tab browses into a subfolder
-$pubSubdir = $tab === 'public'  ? $subdir : '';
-$prvSubdir = $tab === 'private' ? $subdir : '';
-
-$pubStorageDir = ESSE_ROOT . '/storage/downloads/public'  . ($pubSubdir !== '' ? '/' . $pubSubdir : '');
-$prvStorageDir = ESSE_ROOT . '/storage/downloads/private' . ($prvSubdir !== '' ? '/' . $prvSubdir : '');
-
-[$pubSubdirs, $pubFiles] = esse_dl_admin_read_dir($pubStorageDir, $allowedExt);
-[$prvSubdirs, $prvFiles] = esse_dl_admin_read_dir($prvStorageDir, $allowedExt);
-
-$csrf = Auth::csrfToken();
-
-$pageTitle   = 'Downloads';
-$activeNav   = 'admin.downloads';
-$topbarRight = Ui::button('Frontend', '/downloads', [
-    'variant' => 'ghost',
-    'size'    => 'sm',
-    'icon'    => 'bi bi-box-arrow-up-right',
-    'attr'    => ['target' => '_blank'],
-]);
-
-ob_start();
-
-echo Ui::tabs([
-    [
-        'label'   => 'Öffentlich',
-        'content' => esse_dl_admin_build_tab('public',  $pubSubdir, $pubSubdirs, $pubFiles, $csrf, $allowedExt),
-        'active'  => $tab === 'public',
-    ],
-    [
-        'label'   => 'Intern',
-        'content' => esse_dl_admin_build_tab('private', $prvSubdir, $prvSubdirs, $prvFiles, $csrf, $allowedExt),
-        'active'  => $tab === 'private',
-    ],
-]);
-
+    </div>
+    <?php endif; ?>
+</div>
+<?php
 $content = ob_get_clean();
 require ESSE_ROOT . '/admin/layout.php';

@@ -6,6 +6,14 @@ Versionierung nach [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.0.3] – 2026-06-05
+
+### Behoben
+
+- Admin-Ansicht wieder auf Bootstrap 5 zurückgestellt — `Esse\Ui`-Klassen (`esse-panel`, `esse-tabs`, `esse-table` …) werden im Admin-Layout nicht geladen und hatten die Darstellung gebrochen
+
+---
+
 ## [0.0.2] – 2026-06-05
 
 ### Geändert

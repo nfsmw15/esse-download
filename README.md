@@ -2,7 +2,7 @@
 
 Download-Bereich Plugin für [ESSE CMS](https://github.com/nfsmw15/esse-cms).
 
-[![Version](https://img.shields.io/badge/version-0.0.2-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.0.3-blue)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-AGPL--3.0--or--later-green)](LICENSE)
 [![ESSE CMS](https://img.shields.io/badge/esse--cms-%3E%3D0.1.0-orange)](https://github.com/nfsmw15/esse-cms)
 
@@ -124,7 +124,7 @@ ESSE_ROOT/storage/downloads/
 
 ```bash
 # Im Elternverzeichnis des Plugins:
-zip -r esse-download-v0.0.2.zip esse-download/ \
+zip -r esse-download-v0.0.3.zip esse-download/ \
   --exclude "esse-download/.git/*" \
   --exclude "esse-download/.vscode/*" \
   --exclude "esse-download/.claude/*" \
