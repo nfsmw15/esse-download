@@ -19,7 +19,7 @@ class Plugin extends \Esse\Plugin
         $base = $this->basePath();
 
         Router::get('/downloads', function () use ($base) {
-            PageRenderer::renderFile("{$base}/frontend/list.php", 'Downloads');
+            PageRenderer::renderFile("{$base}/frontend/list.php", 'Downloads', 'public', 'download');
         }, ['name' => 'downloads.list', 'auth' => 'public']);
 
         Router::get('/downloads/get', function () use ($base) {
