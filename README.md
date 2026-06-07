@@ -2,36 +2,25 @@
 
 Download-Bereich Plugin für [ESSE CMS](https://github.com/nfsmw15/esse-cms).
 
-[![Version](https://img.shields.io/badge/version-0.0.3-blue)](CHANGELOG.md)
+[![Release](https://img.shields.io/github/v/release/nfsmw15/esse-download?label=release&color=blue)](https://github.com/nfsmw15/esse-download/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0--or--later-green)](LICENSE)
 [![ESSE CMS](https://img.shields.io/badge/esse--cms-%3E%3D0.1.0-orange)](https://github.com/nfsmw15/esse-cms)
 
-> Dieses Plugin funktioniert **nur in Verbindung mit [ESSE CMS](https://github.com/nfsmw15/esse-cms)** (≥ 0.1.0).
+## Über das Plugin
 
----
-
-## Features
-
-- **Öffentliche Downloads** — für alle Besucher abrufbar
-- **Interne Downloads** — Dateiliste sichtbar, Download nur für eingeloggte Mitglieder
-- **Unterordner-Navigation** (1 Ebene)
-- **Sichere Dateiauslieferung** via PHP-Route — kein Direktzugriff auf Dateien
-- **Path-Traversal-Schutz** via `realpath()`
-- **Admin-Panel** — Dateien hochladen, löschen, Ordner erstellen
-- **CSRF-Schutz** auf allen POST-Actions
-- Theme-integriert über `PageRenderer`
-
-**Unterstützte Dateiformate:** PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR, GZ, TAR, TXT
-
----
+esse-download stellt einen Download-Bereich für ESSE CMS bereit, der Dateien in zwei
+getrennten Bereichen verwaltet: öffentlich zugängliche Downloads und interne Downloads,
+deren Dateiliste zwar sichtbar ist, deren Download aber eingeloggten Mitgliedern
+vorbehalten bleibt. Die Auslieferung erfolgt ausschließlich über eine geschützte
+PHP-Route mit Path-Traversal-Schutz — ein Direktzugriff auf die Dateien ist nicht
+möglich. Admin- und Frontend-Ausgabe sind vollständig theme-agnostisch über `Esse\Ui`
+umgesetzt und passen sich automatisch an das aktive Theme an.
 
 ## Voraussetzungen
 
 - ESSE CMS ≥ 0.1.0
 - PHP ≥ 8.1
 - Schreibrechte auf `storage/downloads/` im CMS-Verzeichnis
-
----
 
 ## Installation
 
@@ -54,30 +43,39 @@ storage/downloads/
 └── private/   ← Dateien nur für eingeloggte Mitglieder
 ```
 
----
+### ZIP selbst erstellen
 
-## Verwendung
+```bash
+# Im Elternverzeichnis des Plugins:
+zip -r esse-download-v0.0.3.zip esse-download/ \
+  --exclude "esse-download/.git/*" \
+  --exclude "esse-download/.vscode/*" \
+  --exclude "esse-download/.claude/*" \
+  --exclude "esse-download/node_modules/*" \
+  --exclude "esse-download/.DS_Store"
+```
 
-### Dateien hochladen
+## Routen
 
-Über **Admin → Downloads** lassen sich Dateien in beide Bereiche hochladen.
-Unterordner können im Admin-Panel erstellt werden und erscheinen automatisch
-als Ordner-Navigation auf der Frontend-Seite.
+| Route | Beschreibung | Sichtbarkeit |
+|---|---|---|
+| `/downloads` | Download-Übersicht mit Ordner-Navigation | öffentlich |
+| `/downloads/get?type=public&file=...` | Datei aus dem öffentlichen Bereich herunterladen | öffentlich |
+| `/downloads/get?type=private&file=...` | Datei aus dem internen Bereich herunterladen | Mitglieder |
+| `/admin/downloads` | Admin-Verwaltung (Upload, Löschen, Ordner anlegen) | Admin |
 
-### Menü-Eintrag anlegen
+## Features
 
-Den Download-Bereich unter **Admin → Menüs** auf die URL `/downloads` verlinken.
+- **Öffentliche Downloads** — für alle Besucher abrufbar
+- **Interne Downloads** — Dateiliste sichtbar, Download nur für eingeloggte Mitglieder
+- **Unterordner-Navigation** (1 Ebene)
+- **Sichere Dateiauslieferung** via PHP-Route — kein Direktzugriff auf Dateien
+- **Path-Traversal-Schutz** via `realpath()`
+- **Admin-Panel** — Dateien hochladen, löschen, Ordner erstellen
+- **CSRF-Schutz** auf allen POST-Actions
+- Theme-integriert über `PageRenderer` und `Esse\Ui`
 
-### Seitenstruktur
-
-| URL | Beschreibung | Zugriff |
-|-----|-------------|---------|
-| `/downloads` | Download-Übersicht | öffentlich |
-| `/downloads/get?type=public&file=...` | Datei herunterladen (öffentlich) | öffentlich |
-| `/downloads/get?type=private&file=...` | Datei herunterladen (intern) | eingeloggt |
-| `/admin/downloads` | Admin-Verwaltung | Admin |
-
----
+**Unterstützte Dateiformate:** PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR, GZ, TAR, TXT
 
 ## Dateistruktur
 
@@ -107,8 +105,6 @@ ESSE_ROOT/storage/downloads/
 └── private/   ← web-gesperrt, Auslieferung via PHP (nur eingeloggt)
 ```
 
----
-
 ## Sicherheit
 
 - Alle Dateien werden über eine PHP-Route ausgeliefert — kein Direktzugriff möglich
@@ -118,25 +114,8 @@ ESSE_ROOT/storage/downloads/
 - Alle POST-Actions sind mit CSRF-Token gesichert
 - Datei-Uploads werden mit `is_uploaded_file()` validiert
 
----
-
-## ZIP erstellen
-
-```bash
-# Im Elternverzeichnis des Plugins:
-zip -r esse-download-v0.0.3.zip esse-download/ \
-  --exclude "esse-download/.git/*" \
-  --exclude "esse-download/.vscode/*" \
-  --exclude "esse-download/.claude/*" \
-  --exclude "esse-download/node_modules/*" \
-  --exclude "esse-download/.DS_Store"
-```
-
----
-
 ## Lizenz
 
-Copyright (C) 2026 Andreas P. <https://github.com/nfsmw15>  
-SPDX-License-Identifier: AGPL-3.0-or-later
+AGPL-3.0-or-later — siehe [LICENSE](LICENSE)
 
-Dieses Programm ist freie Software. Details siehe [LICENSE](LICENSE).
+Copyright (C) 2026 Andreas P. <https://github.com/nfsmw15>
