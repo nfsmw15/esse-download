@@ -76,6 +76,28 @@ function esse_dl_admin_size(int $bytes): string
 }
 
 [$subdirs, $files] = esse_dl_admin_read_dir($storageDir, $allowedExt);
+
+// Mediathek nachträglich mit vorhandenen Dateien befüllen (additiv, nur wenn verfügbar).
+if (class_exists(\Esse\Media::class)) {
+    foreach ($files as $f) {
+        $mediaPath = '/downloads/get?type=' . $tab . '&file=' . rawurlencode($f['name'])
+            . ($subdir !== '' ? '&dir=' . rawurlencode($subdir) : '');
+
+        if (\Esse\Media::findByPath($mediaPath)) {
+            continue;
+        }
+
+        $filepath = $storageDir . '/' . $f['name'];
+        \Esse\Media::register($mediaPath, [
+            'filename'   => $f['name'],
+            'mime_type'  => mime_content_type($filepath) ?: '',
+            'size'       => $f['size'],
+            'visibility' => $tab, // 'public' | 'private' entspricht 1:1 der Esse\Media-Sichtbarkeit
+            'source'     => 'esse-download',
+        ]);
+    }
+}
+
 $csrf = Auth::csrfToken();
 
 $pageTitle   = 'Downloads';

@@ -1,6 +1,6 @@
 {
     "name": "esse-download",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Download-Bereich mit öffentlichen und internen Dateien.",
     "author": "Andreas P.",
     "class": "EsseDownload\\Plugin",

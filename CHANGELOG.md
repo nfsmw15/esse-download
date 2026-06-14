@@ -6,6 +6,17 @@ Versionierung nach [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.1.1] – 2026-06-14
+
+### Hinzugefügt
+
+- **Mediathek-Backfill**: Bereits vor v0.1.0 hochgeladene Dateien werden jetzt nachträglich
+  in der ESSE-Mediathek registriert — beim Anzeigen eines Ordners im Admin-Bereich
+  (`/admin/downloads`) wird jede dort noch nicht im Mediathek-Index vorhandene Datei
+  automatisch per `Esse\Media::register()` nachgetragen.
+
+---
+
 ## [0.1.0] – 2026-06-14
 
 ### Hinzugefügt

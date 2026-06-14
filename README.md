@@ -47,7 +47,7 @@ storage/downloads/
 
 ```bash
 # Im Elternverzeichnis des Plugins:
-zip -r esse-download-v0.1.0.zip esse-download/ \
+zip -r esse-download-v0.1.1.zip esse-download/ \
   --exclude "esse-download/.git/*" \
   --exclude "esse-download/.vscode/*" \
   --exclude "esse-download/.claude/*" \
