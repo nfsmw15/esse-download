@@ -47,10 +47,26 @@ if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
     exit;
 }
 
-if (!move_uploaded_file($_FILES['file']['tmp_name'], $uploadDir . '/' . $filename)) {
+$filepath = $uploadDir . '/' . $filename;
+
+if (!move_uploaded_file($_FILES['file']['tmp_name'], $filepath)) {
     $_SESSION['flash'] = ['type' => 'danger', 'message' => 'Upload fehlgeschlagen.'];
     header('Location: ' . $redirectBack);
     exit;
+}
+
+if (class_exists(\Esse\Media::class)) {
+    $mediaPath = '/downloads/get?type=' . $type . '&file=' . rawurlencode($filename)
+        . ($subdir !== '' ? '&dir=' . rawurlencode($subdir) : '');
+
+    \Esse\Media::register($mediaPath, [
+        'filename'    => $filename,
+        'mime_type'   => mime_content_type($filepath) ?: '',
+        'size'        => filesize($filepath) ?: 0,
+        'visibility'  => $type, // 'public' | 'private' entspricht 1:1 der Esse\Media-Sichtbarkeit
+        'uploaded_by' => Auth::id(),
+        'source'      => 'esse-download',
+    ]);
 }
 
 $_SESSION['flash'] = ['type' => 'success', 'message' => htmlspecialchars($filename) . ' wurde hochgeladen.'];

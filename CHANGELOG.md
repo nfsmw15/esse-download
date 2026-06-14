@@ -6,6 +6,19 @@ Versionierung nach [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.1.0] – 2026-06-14
+
+### Hinzugefügt
+
+- **Mediathek-Integration** (additiv, optional): Hochgeladene Dateien werden — sofern die
+  ESSE-Mediathek (`Esse\Media`, ab einer kommenden ESSE-Version) verfügbar ist — automatisch
+  unter `/admin/media` registriert. Die Sichtbarkeit (`public`/`private`) entspricht direkt
+  dem Download-Bereich, in den die Datei hochgeladen wurde. Beim Löschen einer Datei wird der
+  zugehörige Mediathek-Eintrag entfernt. Auf älteren ESSE-Versionen ohne Mediathek hat dies
+  keine Auswirkung (`class_exists`-Prüfung).
+
+---
+
 ## [0.0.3] – 2026-06-05
 
 ### Behoben

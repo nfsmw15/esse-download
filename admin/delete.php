@@ -37,6 +37,16 @@ if (!$realFile || !$realBase || !str_starts_with($realFile, $realBase . '/')) {
 
 @unlink($realFile);
 
+if (class_exists(\Esse\Media::class)) {
+    $mediaPath = '/downloads/get?type=' . $type . '&file=' . rawurlencode($file)
+        . ($subdir !== '' ? '&dir=' . rawurlencode($subdir) : '');
+
+    $media = \Esse\Media::findByPath($mediaPath);
+    if ($media) {
+        \Esse\Media::delete($media['id']);
+    }
+}
+
 $_SESSION['flash'] = ['type' => 'success', 'message' => htmlspecialchars($file) . ' wurde gelöscht.'];
 header('Location: ' . $redirectBack);
 exit;

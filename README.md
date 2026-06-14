@@ -47,7 +47,7 @@ storage/downloads/
 
 ```bash
 # Im Elternverzeichnis des Plugins:
-zip -r esse-download-v0.0.3.zip esse-download/ \
+zip -r esse-download-v0.1.0.zip esse-download/ \
   --exclude "esse-download/.git/*" \
   --exclude "esse-download/.vscode/*" \
   --exclude "esse-download/.claude/*" \
@@ -73,6 +73,8 @@ zip -r esse-download-v0.0.3.zip esse-download/ \
 - **Path-Traversal-Schutz** via `realpath()`
 - **Admin-Panel** — Dateien hochladen, löschen, Ordner erstellen
 - **CSRF-Schutz** auf allen POST-Actions
+- **Mediathek-Integration** — hochgeladene Dateien werden automatisch in der ESSE-Mediathek
+  (`/admin/media`) registriert, sofern verfügbar; Sichtbarkeit entspricht dem Download-Bereich
 - Theme-integriert über `PageRenderer` und `Esse\Ui`
 
 **Unterstützte Dateiformate:** PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR, GZ, TAR, TXT
